@@ -1,0 +1,8 @@
+{
+  "remote_agent_runtime_id": "projects/536672091587/locations/us-east1/reasoningEngines/7747543758379417600",
+  "sandbox_resource_name": "projects/536672091587/locations/us-east1/reasoningEngines/2175605856903626752/sandboxEnvironments/6336080890594066432",
+  "deployment_target": "agent_runtime",
+  "is_a2a": true,
+  "agent_directory": "app",
+  "deployment_timestamp": "2026-09-29T12:57:28.633943+00:00"
+}

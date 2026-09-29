@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApexMotion Coach</title>
+<!-- Material Symbols for A2UI icons and UI accents -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bungee&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #ff4757;
+    --accent-glow: rgba(255, 71, 87, 0.25);
+    --bg: #0f111a;
+    --card-bg: #1a1d2e;
+    --chat-bg: #141724;
+    --border: #2a2e45;
+    --text: #f1f2f6;
+    --text-muted: #a4b0be;
+    --user-bubble: #ff4757;
+    --theme-name: "Urban Neon";
+  }
+
+  /* Theme definitions */
+  body.theme-gym {
+    --accent: #ff793f;
+    --accent-glow: rgba(255, 121, 63, 0.25);
+    --bg: #121214;
+    --card-bg: #1e1e24;
+    --chat-bg: #18181d;
+    --border: #33333d;
+    --text: #f5f6fa;
+    --text-muted: #95a5a6;
+    --user-bubble: #e66767;
+  }
+
+  body.theme-outdoor {
+    --accent: #2ed573;
+    --accent-glow: rgba(46, 213, 115, 0.25);
+    --bg: #0d1b1e;
+    --card-bg: #152b30;
+    --chat-bg: #102327;
+    --border: #234249;
+    --text: #f1f2f6;
+    --text-muted: #7bed9f;
+    --user-bubble: #10ac84;
+  }
+
+  body.theme-electric {
+    --accent: #00d2d3;
+    --accent-glow: rgba(0, 210, 211, 0.25);
+    --bg: #0a1128;
+    --card-bg: #101d42;
+    --chat-bg: #0c1736;
+    --border: #1c3166;
+    --text: #ffffff;
+    --text-muted: #70a1ff;
+    --user-bubble: #0984e3;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* App Header */
+  header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1.4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 10;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .brand-icon {
+    background: var(--accent);
+    color: #fff;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 0 15px var(--accent-glow);
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #ffffff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* Header Controls (Theme & Coach Pickers) */
+  .header-actions {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .pill-select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--chat-bg);
+    padding: 0.35rem 0.7rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  select option {
+    background: var(--card-bg);
+    color: var(--text);
+  }
+
+  /* Chat Logs */
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1.2rem;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* Comic Dialogue Row */
+  .dialogue-turn {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dialogue-turn.user {
+    flex-direction: row-reverse;
+  }
+
+  /* Cute Comic Character Avatar */
+  .avatar-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 76px;
+    text-align: center;
+  }
+
+  .avatar-frame {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 4px 12px var(--accent-glow);
+    transition: transform 0.2s ease;
+  }
+
+  .avatar-frame svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .dialogue-turn:hover .avatar-frame {
+    transform: scale(1.05) rotate(2deg);
+  }
+
+  .avatar-name {
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: -0.2px;
+  }
+
+  .avatar-title {
+    font-size: 0.62rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  /* Speech Bubble (Comic Dialogue Layout) */
+  .bubble-container {
+    max-width: 80%;
+    position: relative;
+  }
+
+  .bubble {
+    position: relative;
+    padding: 0.9rem 1.2rem;
+    border-radius: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    white-space: pre-wrap;
+  }
+
+  /* Comic speech pointers */
+  .dialogue-turn.agent .bubble::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid var(--border);
+  }
+
+  .dialogue-turn.agent .bubble::after {
+    content: "";
+    position: absolute;
+    top: 19px;
+    left: -6px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-right: 7px solid var(--card-bg);
+  }
+
+  .dialogue-turn.user .bubble {
+    background: var(--user-bubble);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 15px var(--accent-glow);
+  }
+
+  .dialogue-turn.user .bubble::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    right: -8px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid var(--user-bubble);
+  }
+
+  .bubble.rich {
+    background: transparent;
+    border: none;
+    padding: 0;
+    max-width: 100%;
+    white-space: normal;
+    box-shadow: none;
+  }
+
+  .bubble.rich::before, .bubble.rich::after {
+    display: none;
+  }
+
+  /* Footer Controls & Suggested Prompts */
+  .footer-panel {
+    border-top: 1px solid var(--border);
+    background: var(--card-bg);
+    padding: 0.8rem 1.2rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .prompt-row-container {
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .prompts-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .prompt-chips {
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .prompt-chip {
+    background: var(--chat-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.45rem 0.85rem;
+    border-radius: 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .prompt-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255, 71, 87, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .input-form {
+    display: flex;
+    gap: 0.6rem;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  input {
+    flex: 1;
+    padding: 0.85rem 1.1rem;
+    background: var(--chat-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: var(--text);
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  button {
+    padding: 0.85rem 1.4rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 15px var(--accent-glow);
+    transition: transform 0.15s, opacity 0.15s;
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+  }
+
+  /* --- A2UI Component Styles (Customized for Dark/Themed UI) --- */
+  .a2card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    background: var(--card-bg);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    max-width: 100%;
+  }
+  .a2card + .a2card, .a2col > .a2card { margin-top: 0.75rem; }
+  .a2col { display: flex; flex-direction: column; gap: 0.6rem; }
+  .a2row { display: flex; flex-direction: row; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .a2row.between { justify-content: space-between; }
+  .a2text { margin: 0; line-height: 1.5; color: var(--text); }
+  .a2text.a2-h1 { font-size: 1.45rem; font-weight: 800; color: #fff; letter-spacing: -0.4px; }
+  .a2text.a2-h2 { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+  .a2text.a2-h3 { font-size: 1.05rem; font-weight: 600; }
+  .a2text.a2-h4 { font-size: 0.95rem; font-weight: 600; }
+  .a2text.a2-caption { font-size: 0.85rem; color: var(--text-muted); }
+  .a2divider { border: none; border-top: 1px solid var(--border); margin: 0.6rem 0; width: 100%; }
+  .a2img { max-width: 100%; border-radius: 12px; display: block; border: 1px solid var(--border); }
+  .material-symbols-outlined { font-size: 1.25rem; line-height: 1; vertical-align: middle; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-group">
+    <div class="brand-icon">
+      <span class="material-symbols-outlined" style="color:#fff;">fitness_center</span>
+    </div>
+    <div>
+      <div class="brand-title">ApexMotion</div>
+      <div class="brand-subtitle">Elite Calisthenics & Strength Coach</div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <!-- Celebrity Coach Picker -->
+    <div class="pill-select-wrapper">
+      <span class="material-symbols-outlined" style="font-size:1.05rem;">sports_martial_arts</span>
+      <select id="coachSelect">
+        <option value="arnold">Comic Arnie 🏋️‍♂️</option>
+        <option value="bruce">Master Lee 🥋</option>
+        <option value="serena">Champion Serena ⚡</option>
+        <option value="goku">Sensei Goku 🔥</option>
+      </select>
+    </div>
+
+    <!-- Theme Switcher -->
+    <div class="pill-select-wrapper">
+      <span class="material-symbols-outlined" style="font-size:1.05rem;">palette</span>
+      <select id="themeSelect">
+        <option value="neon">Neon Urban</option>
+        <option value="gym">Indoor Gym</option>
+        <option value="outdoor">Outdoor Park</option>
+        <option value="electric">Electric Cyber</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<div id="log"></div>
+
+<div class="footer-panel">
+  <!-- Clickable Prompt Chips -->
+  <div class="prompt-row-container">
+    <div class="prompts-label">
+      <span class="material-symbols-outlined" style="font-size:0.9rem;">bolt</span>
+      Suggested Workouts & Progressions
+    </div>
+    <div class="prompt-chips">
+      <div class="prompt-chip" data-prompt="What is the best way to train for the planche? Give me form cues and progressions.">
+        <span>🤸</span> Planche Progressions & Visual
+      </div>
+      <div class="prompt-chip" data-prompt="I just did 4 sets of weighted pull-ups and 3 sets of muscle-ups at RPE 8. Log this workout and check my muscle fatigue.">
+        <span>📊</span> Log Workout & Fatigue Decay
+      </div>
+      <div class="prompt-chip" data-prompt="Are there any calisthenics parks or athletic gyms nearby? Address: 1600 Amphitheatre Parkway, Mountain View, CA">
+        <span>📍</span> Find Calisthenics Parks Nearby
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Input -->
+  <form id="form" class="input-form">
+    <input id="input" placeholder="Ask your coach for workout advice, form checks, or fatigue tracking…" autocomplete="off" autofocus>
+    <button type="submit">
+      <span>Send</span>
+      <span class="material-symbols-outlined" style="font-size:1rem; color:#fff;">send</span>
+    </button>
+  </form>
+</div>
+
+<script>
+// --- Celebrity Comic Avatars (SVG graphics) ---
+const CELEBRITIES = {
+  arnold: {
+    name: "Arnie",
+    title: "Iron Champion",
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#ffeaa7"/>
+      <!-- Hair -->
+      <path d="M25,35 Q50,15 75,35 Q78,25 65,18 Q50,12 35,18 Z" fill="#b33939"/>
+      <!-- Shades -->
+      <polygon points="28,40 46,40 44,52 30,52" fill="#2d3436"/>
+      <polygon points="54,40 72,40 70,52 56,52" fill="#2d3436"/>
+      <line x1="46" y1="45" x2="54" y2="45" stroke="#2d3436" stroke-width="3"/>
+      <!-- Grin / Cigar -->
+      <path d="M40,68 Q50,78 62,68" stroke="#2c2c54" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <rect x="58" y="66" width="18" height="5" rx="2" fill="#cd6133" transform="rotate(-10 58 66)"/>
+      <circle cx="76" cy="63" r="2.5" fill="#e74c3c"/>
+      <!-- Jawline -->
+      <path d="M30,55 L35,80 L65,80 L70,55" stroke="#f8a5c2" stroke-width="2" fill="none"/>
+    </svg>`
+  },
+  bruce: {
+    name: "Master Lee",
+    title: "Martial Legend",
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#f8c291"/>
+      <!-- Bowl Cut Hair -->
+      <path d="M20,40 C20,15 80,15 80,40 C80,25 70,22 50,22 C30,22 20,25 20,40 Z" fill="#1e272e"/>
+      <path d="M20,40 L24,55 L28,42 L72,42 L76,55 L80,40" fill="#1e272e"/>
+      <!-- Expressive Comic Eyes -->
+      <ellipse cx="38" cy="48" rx="6" ry="3" fill="#2d3436"/>
+      <ellipse cx="62" cy="48" rx="6" ry="3" fill="#2d3436"/>
+      <line x1="30" y1="42" x2="44" y2="44" stroke="#1e272e" stroke-width="3"/>
+      <line x1="70" y1="42" x2="56" y2="44" stroke="#1e272e" stroke-width="3"/>
+      <!-- Mouth Wataah -->
+      <ellipse cx="50" cy="68" rx="7" ry="9" fill="#b33939"/>
+      <path d="M45,64 Q50,66 55,64" stroke="#fff" stroke-width="2" fill="none"/>
+      <!-- Scratch on cheek -->
+      <line x1="30" y1="56" x2="35" y2="60" stroke="#eb2f06" stroke-width="2"/>
+      <line x1="28" y1="60" x2="34" y2="64" stroke="#eb2f06" stroke-width="2"/>
+    </svg>`
+  },
+  serena: {
+    name: "Serena",
+    title: "Grand Slam Ace",
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#c68642"/>
+      <!-- Voluminous Curly Bun -->
+      <circle cx="50" cy="24" r="18" fill="#2c2c54"/>
+      <circle cx="36" cy="30" r="12" fill="#2c2c54"/>
+      <circle cx="64" cy="30" r="12" fill="#2c2c54"/>
+      <!-- Headband -->
+      <path d="M26,38 Q50,30 74,38" stroke="#ff4757" stroke-width="6" fill="none"/>
+      <!-- Eyes & Lashes -->
+      <ellipse cx="38" cy="50" rx="5" ry="4" fill="#2d3436"/>
+      <ellipse cx="62" cy="50" rx="5" ry="4" fill="#2d3436"/>
+      <path d="M34,46 L30,42" stroke="#2d3436" stroke-width="2"/>
+      <path d="M66,46 L70,42" stroke="#2d3436" stroke-width="2"/>
+      <!-- Determined Smile -->
+      <path d="M40,68 Q50,76 60,68" stroke="#fff" stroke-width="3" fill="#881028" stroke-linecap="round"/>
+    </svg>`
+  },
+  goku: {
+    name: "Goku",
+    title: "Ultra Calisthenics",
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#ffeaa7"/>
+      <!-- Super Saiyan / Anime Hair spikes -->
+      <polygon points="50,6 62,26 50,22 76,14 70,36 88,32 74,48 50,42 26,48 12,32 30,36 24,14 50,22" fill="#1e272e"/>
+      <!-- Intense Anime Eyes -->
+      <polygon points="34,48 46,52 36,56" fill="#2d3436"/>
+      <polygon points="66,48 54,52 64,56" fill="#2d3436"/>
+      <circle cx="41" cy="52" r="2" fill="#fff"/>
+      <circle cx="59" cy="52" r="2" fill="#fff"/>
+      <line x1="32" y1="45" x2="48" y2="50" stroke="#2d3436" stroke-width="2.5"/>
+      <line x1="68" y1="45" x2="52" y2="50" stroke="#2d3436" stroke-width="2.5"/>
+      <!-- Confident smirk -->
+      <path d="M44,68 Q52,73 58,67" stroke="#2d3436" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>`
+  },
+  user: {
+    name: "You",
+    title: "Athlete",
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#70a1ff"/>
+      <circle cx="50" cy="40" r="20" fill="#ffffff"/>
+      <path d="M22,86 C22,66 40,64 50,64 C60,64 78,66 78,86 Z" fill="#ffffff"/>
+    </svg>`
+  }
+};
+
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const themeSelect = document.getElementById("themeSelect");
+const coachSelect = document.getElementById("coachSelect");
+
+// --- Theme Switching ---
+themeSelect.addEventListener("change", (e) => {
+  document.body.className = "";
+  if (e.target.value === "gym") document.body.classList.add("theme-gym");
+  else if (e.target.value === "outdoor") document.body.classList.add("theme-outdoor");
+  else if (e.target.value === "electric") document.body.classList.add("theme-electric");
+});
+
+// Helper DOM creator
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+// Create Comic Dialogue Layout with Celebrity Character
+function createDialogueTurn(who) {
+  const turn = el("div", "dialogue-turn " + who);
+
+  const charKey = (who === "user") ? "user" : coachSelect.value;
+  const charData = CELEBRITIES[charKey] || CELEBRITIES.arnold;
+
+  const avatar = el("div", "avatar-card");
+  const frame = el("div", "avatar-frame");
+  frame.innerHTML = charData.svg;
+  avatar.appendChild(frame);
+  avatar.appendChild(el("div", "avatar-name", charData.name));
+  avatar.appendChild(el("div", "avatar-title", charData.title));
+  turn.appendChild(avatar);
+
+  const bubbleContainer = el("div", "bubble-container");
+  const b = el("div", "bubble");
+  bubbleContainer.appendChild(b);
+  turn.appendChild(bubbleContainer);
+
+  log.appendChild(turn);
+  log.scrollTop = log.scrollHeight;
+  return b;
+}
+
+// Prompt Chip Click Handler
+document.querySelectorAll(".prompt-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    input.value = chip.getAttribute("data-prompt");
+    form.dispatchEvent(new Event("submit"));
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * A2UI mini-renderer (v0.8 Basic Catalog subset).
+ * -------------------------------------------------------------------------- */
+function boundStr(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v.literalString === "string") return v.literalString;
+  return "";
+}
+
+function childIds(props) {
+  const ids = [];
+  if (props && typeof props.child === "string") ids.push(props.child);
+  const ch = props && props.children;
+  if (ch && Array.isArray(ch.explicitList)) for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
+  return ids;
+}
+
+function iconName(n) { return String(n || "").replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/\s+/g, "_").toLowerCase(); }
+
+function buildNode(id, comps, seen) {
+  if (!id || seen.has(id)) return null;
+  seen.add(id);
+  const spec = comps[id];
+  if (!spec || typeof spec !== "object") return null;
+  const type = Object.keys(spec)[0];
+  const props = spec[type] || {};
+  const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+
+  switch (type) {
+    case "Card": {
+      const d = el("div", "a2card");
+      kids().forEach(k => d.appendChild(k));
+      return d;
+    }
+    case "Column": {
+      const d = el("div", "a2col");
+      kids().forEach(k => d.appendChild(k));
+      return d;
+    }
+    case "Row": {
+      const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
+      kids().forEach(k => d.appendChild(k));
+      return d;
+    }
+    case "Text": {
+      const hint = String(props.usageHint || "body").toLowerCase();
+      const tag = hint === "h1" ? "h1" : hint === "h2" ? "h2" : hint === "h3" ? "h3" : hint === "h4" ? "h4" : "p";
+      const cls = "a2text a2-" + hint;
+      return el(tag, cls, boundStr(props.text));
+    }
+    case "Divider": return el("hr", "a2divider");
+    case "List": {
+      const ul = el("ul", "a2col");
+      kids().forEach(k => { const li = el("li"); li.appendChild(k); ul.appendChild(li); });
+      return ul;
+    }
+    case "Image": {
+      const url = boundStr(props.url);
+      if (!/^https?:\/\//i.test(url)) return el("div", "a2text a2-caption", "(image: " + (boundStr(props.altText) || url) + ")");
+      const img = el("img", "a2img");
+      img.src = url;
+      img.alt = boundStr(props.altText) || "";
+      return img;
+    }
+    case "Icon": {
+      const sym = iconName(props.name);
+      return el("span", "material-symbols-outlined", sym || "star");
+    }
+    default:
+      return null;
+  }
+}
+
+function renderSurface(messages, container) {
+  const comps = {};
+  let rootId = null;
+  for (const m of messages) {
+    if (m.beginRendering) rootId = m.beginRendering.root || rootId;
+    if (m.surfaceUpdate && Array.isArray(m.surfaceUpdate.components)) {
+      for (const c of m.surfaceUpdate.components) {
+        if (c && c.id && c.component) comps[c.id] = c.component;
+      }
+    }
+  }
+  let rootIds = rootId ? [rootId] : [];
+  if (!rootIds.length) {
+    const referenced = new Set();
+    for (const id in comps) { const spec = comps[id]; childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c)); }
+    rootIds = Object.keys(comps).filter(id => !referenced.has(id));
+  }
+  let drew = false;
+  for (const rid of rootIds) { const node = buildNode(rid, comps, new Set()); if (node) { container.appendChild(node); drew = true; } }
+  return drew;
+}
+
+function flattenText(messages) {
+  const out = [];
+  for (const m of messages) {
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.component && c.component.Text) out.push(boundStr(c.component.Text.text));
+  }
+  return out.join("\n").trim();
+}
+
+function renderReply(b, parts) {
+  b.textContent = "";
+  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
+  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+
+  const textStr = texts.join("\n").trim();
+  if (textStr) b.appendChild(el("div", null, textStr));
+
+  if (a2ui.length) {
+    b.classList.add("rich");
+    if (!renderSurface(a2ui, b)) b.appendChild(el("div", null, flattenText(a2ui) || "(no card content)"));
+  }
+  if (!b.childNodes.length) b.textContent = "(no response)";
+  log.scrollTop = log.scrollHeight;
+}
+
+// Initial Welcome Message
+window.addEventListener("DOMContentLoaded", () => {
+  const welcomeBubble = createDialogueTurn("agent");
+  welcomeBubble.textContent = "Welcome to ApexMotion! I'm your sports coach. Choose your favorite celebrity avatar above, pick a theme (like Outdoor Calisthenics or Indoor Gym), and let's crush your workout goals!";
+});
+
+// Submit Form Handler
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+
+  createDialogueTurn("user").textContent = text;
+  input.value = "";
+
+  const b = createDialogueTurn("agent");
+  b.textContent = "…";
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error(`Server returned non-JSON (HTTP ${res.status}). ${raw.slice(0, 300)}`); }
+    renderReply(b, data.parts || []);
+  } catch (e) {
+    b.textContent = "Error: " + e.message;
+  }
+});
+</script>
+</body>
+</html>
